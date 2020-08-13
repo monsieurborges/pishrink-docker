@@ -44,7 +44,7 @@ pishrink [-adhrspvzZ] IMAGE.img NEW-IMAGE.img
 
 If you specify the `NEW-IMAGE.img` parameter, the script will make a copy of `IMAGE.img` and work off that. You will need enough space to make a full copy of the image to use that option.
 
-Check out [PiShrink GitHub](https://github.com/Drewsif/PiShrink/blob/master/README.md) for more details.
+Check out [PiShrink GitHub](https://github.com/Drewsif/PiShrink) for more details.
 
 ## Author
 
