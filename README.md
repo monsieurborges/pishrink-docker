@@ -6,7 +6,7 @@ It's great for saving disk space or sharing your Pi image on the Internet.
 
 This project is a dockerized version of the [PiShrink bash script](https://github.com/Drewsif/PiShrink) by Drew Bonasera.
 
-![Release][release-install-shield] [![License][license-shield]](LICENSE.md) [![Twitter][twitter-shield]](https://twitter.com/mgomesborges)
+![Release][release-install-shield] [![License][license-shield]](LICENSE.md)
 
 ## Usage
 
@@ -29,7 +29,7 @@ This project is a dockerized version of the [PiShrink bash script](https://githu
 
 ## PiShrink options
 
-```
+```shell
 pishrink [-adhrspvzZ] IMAGE.img NEW-IMAGE.img
 
 -s      Do not expand filesystem when image is booted the first time
@@ -56,6 +56,5 @@ The source code is licensed under the [MIT license](LICENSE.md).
 
 The content of this project itself is licensed under the [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0).
 
-[twitter-shield]: https://img.shields.io/twitter/follow/mgomesborges?label=Follow&style=social
-[release-install-shield]: https://img.shields.io/badge/Release-13--Aug--2020-blue
+[release-install-shield]: https://img.shields.io/badge/Release-06--Nov--2020-blue
 [license-shield]: https://img.shields.io/github/license/mgomesborges/mac-dev-setup.svg
