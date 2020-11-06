@@ -1,8 +1,8 @@
 FROM ubuntu:20.04
 
 LABEL maintainer="Marcos Gomes-Borges"
-LABEL version="1.0.0"
-LABEL date="2020-08-13"
+LABEL version="1.0.1"
+LABEL date="2020-11-06"
 
 # ADD Installation Scripts
 ###########################################################

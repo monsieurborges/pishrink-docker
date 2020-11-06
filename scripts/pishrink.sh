@@ -13,56 +13,56 @@ declare -A ZIP_PARALLEL_OPTIONS=( [gzip]="-f9" [xz]="-T0" ) # options for zip to
 declare -A ZIPEXTENSIONS=( [gzip]="gz" [xz]="xz" ) # extensions of zipped files
 
 function info() {
-  echo "$SCRIPTNAME: $1 ..."
+	echo "$SCRIPTNAME: $1 ..."
 }
 
 function error() {
-  echo -n "$SCRIPTNAME: ERROR occured in line $1: "
-  shift
-  echo "$@"
+	echo -n "$SCRIPTNAME: ERROR occured in line $1: "
+	shift
+	echo "$@"
 }
 
 function cleanup() {
-  if losetup "$loopback" &>/dev/null; then
-    losetup -d "$loopback"
-  fi
-  if [ "$debug" = true ]; then
-    local old_owner=$(stat -c %u:%g "$src")
-    chown "$old_owner" "$LOGFILE"
-  fi
+	if losetup "$loopback" &>/dev/null; then
+		losetup -d "$loopback"
+	fi
+	if [ "$debug" = true ]; then
+		local old_owner=$(stat -c %u:%g "$src")
+		chown "$old_owner" "$LOGFILE"
+	fi
 
 }
 
 function logVariables() {
-  if [ "$debug" = true ]; then
-    echo "Line $1" >> "$LOGFILE"
-    shift
-    local v var
-    for var in "$@"; do
-      eval "v=\$$var"
-      echo "$var: $v" >> "$LOGFILE"
-    done
-  fi
+	if [ "$debug" = true ]; then
+		echo "Line $1" >> "$LOGFILE"
+		shift
+		local v var
+		for var in "$@"; do
+			eval "v=\$$var"
+			echo "$var: $v" >> "$LOGFILE"
+		done
+	fi
 }
 
 function checkFilesystem() {
-  info "Checking filesystem"
-  e2fsck -pf "$loopback"
-  (( $? < 4 )) && return
+	info "Checking filesystem"
+	e2fsck -pf "$loopback"
+	(( $? < 4 )) && return
 
-  info "Filesystem error detected!"
+	info "Filesystem error detected!"
 
-  info "Trying to recover corrupted filesystem"
-  e2fsck -y "$loopback"
-  (( $? < 4 )) && return
+	info "Trying to recover corrupted filesystem"
+	e2fsck -y "$loopback"
+	(( $? < 4 )) && return
 
 if [[ $repair == true ]]; then
-  info "Trying to recover corrupted filesystem - Phase 2"
-  e2fsck -fy -b 32768 "$loopback"
-  (( $? < 4 )) && return
+	info "Trying to recover corrupted filesystem - Phase 2"
+	e2fsck -fy -b 32768 "$loopback"
+	(( $? < 4 )) && return
 fi
-  error $LINENO "Filesystem recoveries failed. Giving up..."
-  exit 9
+	error $LINENO "Filesystem recoveries failed. Giving up..."
+	exit 9
 
 }
 
@@ -153,8 +153,8 @@ EOF1
 }
 
 help() {
-  local help
-  read -r -d '' help << EOM
+	local help
+	read -r -d '' help << EOM
 Usage: $0 [-adhrspvzZ] imagefile.img [newimagefile.img]
 
   -s         Don't expand filesystem when image is booted the first time
@@ -166,8 +166,8 @@ Usage: $0 [-adhrspvzZ] imagefile.img [newimagefile.img]
   -p         Remove logs, apt archives, dhcp leases and ssh hostkeys
   -d         Write debug messages in a debug log file
 EOM
-  echo "$help"
-  exit 1
+	echo "$help"
+	exit 1
 }
 
 should_skip_autoexpand=false
@@ -195,10 +195,10 @@ done
 shift $((OPTIND-1))
 
 if [ "$debug" = true ]; then
-  info "Creating log file $LOGFILE"
-  rm "$LOGFILE" &>/dev/null
-  exec 1> >(stdbuf -i0 -o0 -e0 tee -a "$LOGFILE" >&1)
-  exec 2> >(stdbuf -i0 -o0 -e0 tee -a "$LOGFILE" >&2)
+	info "Creating log file $LOGFILE"
+	rm "$LOGFILE" &>/dev/null
+	exec 1> >(stdbuf -i0 -o0 -e0 tee -a "$LOGFILE" >&1)
+	exec 2> >(stdbuf -i0 -o0 -e0 tee -a "$LOGFILE" >&2)
 fi
 
 echo "${0##*/} $version"
@@ -223,16 +223,16 @@ fi
 
 # check selected compression tool is supported and installed
 if [[ -n $ziptool ]]; then
-  if [[ ! " ${ZIPTOOLS[@]} " =~ $ziptool ]]; then
-    error $LINENO "$ziptool is an unsupported ziptool."
-    exit 17
-  else
-    if [[ $parallel == true && $ziptool == "gzip" ]]; then
-      REQUIRED_TOOLS="$REQUIRED_TOOLS pigz"
-    else
-      REQUIRED_TOOLS="$REQUIRED_TOOLS $ziptool"
-    fi
-  fi
+	if [[ ! " ${ZIPTOOLS[@]} " =~ $ziptool ]]; then
+		error $LINENO "$ziptool is an unsupported ziptool."
+		exit 17
+	else
+		if [[ $parallel == true && $ziptool == "gzip" ]]; then
+			REQUIRED_TOOLS="$REQUIRED_TOOLS pigz"
+		else
+			REQUIRED_TOOLS="$REQUIRED_TOOLS $ziptool"
+		fi
+	fi
 fi
 
 #Check that what we need is installed
@@ -270,9 +270,9 @@ beforesize="$(ls -lh "$img" | cut -d ' ' -f 5)"
 parted_output="$(parted -ms "$img" unit B print)"
 rc=$?
 if (( $rc )); then
-  error $LINENO "parted failed with rc $rc"
-  info "Possibly invalid image. Run 'parted $img unit B print' manually to investigate"
-  exit 6
+	error $LINENO "parted failed with rc $rc"
+	info "Possibly invalid image. Run 'parted $img unit B print' manually to investigate"
+	exit 6
 fi
 partnum="$(echo "$parted_output" | tail -n 1 | cut -d ':' -f 1)"
 partstart="$(echo "$parted_output" | tail -n 1 | cut -d ':' -f 2 | tr -d 'B')"
@@ -308,7 +308,7 @@ if [[ $prep == true ]]; then
   info "Syspreping: Removing logs, apt archives, dhcp leases and ssh hostkeys"
   mountdir=$(mktemp -d)
   mount "$loopback" "$mountdir"
-  rm -rf "$mountdir/var/cache/apt/archives/*" "$mountdir/var/lib/dhcpcd5/*" "$mountdir/var/log/*" "$mountdir/var/tmp/*" "$mountdir/tmp/*" "$mountdir/etc/ssh/*_host_*"
+  rm -rvf $mountdir/var/cache/apt/archives/* $mountdir/var/lib/dhcpcd5/* $mountdir/var/log/* $mountdir/var/tmp/* $mountdir/tmp/* $mountdir/etc/ssh/*_host_*
   umount "$mountdir"
 fi
 
@@ -317,9 +317,9 @@ fi
 checkFilesystem
 
 if ! minsize=$(resize2fs -P "$loopback"); then
-  rc=$?
-  error $LINENO "resize2fs failed with rc $rc"
-  exit 10
+	rc=$?
+	error $LINENO "resize2fs failed with rc $rc"
+	exit 10
 fi
 minsize=$(cut -d ':' -f 2 <<< "$minsize" | tr -d ' ')
 logVariables $LINENO currentsize minsize
@@ -360,15 +360,15 @@ logVariables $LINENO partnewsize newpartend
 parted -s -a minimal "$img" rm "$partnum"
 rc=$?
 if (( $rc )); then
-  error $LINENO "parted failed with rc $rc"
-  exit 13
+	error $LINENO "parted failed with rc $rc"
+	exit 13
 fi
 
 parted -s "$img" unit B mkpart "$parttype" "$partstart" "$newpartend"
 rc=$?
 if (( $rc )); then
-  error $LINENO "parted failed with rc $rc"
-  exit 14
+	error $LINENO "parted failed with rc $rc"
+	exit 14
 fi
 
 #Truncate the file
@@ -376,8 +376,8 @@ info "Shrinking image"
 endresult=$(parted -ms "$img" unit B print free)
 rc=$?
 if (( $rc )); then
-  error $LINENO "parted failed with rc $rc"
-  exit 15
+	error $LINENO "parted failed with rc $rc"
+	exit 15
 fi
 
 endresult=$(tail -1 <<< "$endresult" | cut -d ':' -f 2 | tr -d 'B')
@@ -385,36 +385,36 @@ logVariables $LINENO endresult
 truncate -s "$endresult" "$img"
 rc=$?
 if (( $rc )); then
-  error $LINENO "trunate failed with rc $rc"
-  exit 16
+	error $LINENO "trunate failed with rc $rc"
+	exit 16
 fi
 
 # handle compression
 if [[ -n $ziptool ]]; then
-  options=""
-  envVarname="${MYNAME^^}_${ziptool^^}" # PISHRINK_GZIP or PISHRINK_XZ environment variables allow to override all options for gzip or xz
-  [[ $parallel == true ]] && options="${ZIP_PARALLEL_OPTIONS[$ziptool]}"
-  [[ -v $envVarname ]] && options="${!envVarname}" # if environment variable defined use these options
-  [[ $verbose == true ]] && options="$options -v" # add verbose flag if requested
+	options=""
+	envVarname="${MYNAME^^}_${ziptool^^}" # PISHRINK_GZIP or PISHRINK_XZ environment variables allow to override all options for gzip or xz
+	[[ $parallel == true ]] && options="${ZIP_PARALLEL_OPTIONS[$ziptool]}"
+	[[ -v $envVarname ]] && options="${!envVarname}" # if environment variable defined use these options
+	[[ $verbose == true ]] && options="$options -v" # add verbose flag if requested
 
-  if [[ $parallel == true ]]; then
-    parallel_tool="${ZIP_PARALLEL_TOOL[$ziptool]}"
-    info "Using $parallel_tool on the shrunk image"
-    if ! $parallel_tool ${options} "$img"; then
-      rc=$?
-      error $LINENO "$parallel_tool failed with rc $rc"
-      exit 18
-    fi
+	if [[ $parallel == true ]]; then
+		parallel_tool="${ZIP_PARALLEL_TOOL[$ziptool]}"
+		info "Using $parallel_tool on the shrunk image"
+		if ! $parallel_tool ${options} "$img"; then
+			rc=$?
+			error $LINENO "$parallel_tool failed with rc $rc"
+			exit 18
+		fi
 
-  else # sequential
-    info "Using $ziptool on the shrunk image"
-    if ! $ziptool ${options} "$img"; then
-      rc=$?
-      error $LINENO "$ziptool failed with rc $rc"
-      exit 19
-    fi
-  fi
-  img=$img.${ZIPEXTENSIONS[$ziptool]}
+	else # sequential
+		info "Using $ziptool on the shrunk image"
+		if ! $ziptool ${options} "$img"; then
+			rc=$?
+			error $LINENO "$ziptool failed with rc $rc"
+			exit 19
+		fi
+	fi
+	img=$img.${ZIPEXTENSIONS[$ziptool]}
 fi
 
 aftersize=$(ls -lh "$img" | cut -d ' ' -f 5)
