@@ -46,6 +46,10 @@ If you specify the `NEW-IMAGE.img` parameter, the script will make a copy of `IM
 
 Check out [PiShrink GitHub](https://github.com/Drewsif/PiShrink) for more details.
 
+## Docker Hub
+
+* [mgomesborges/pishrink](https://hub.docker.com/r/mgomesborges/pishrink)
+
 ## Author
 
 * [Marcos Gomes-Borges](https://github.com/mgomesborges)
