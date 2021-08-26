@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 LABEL maintainer="Marcos Gomes-Borges"
-LABEL version="1.0.1"
+LABEL version="1.0.2"
 LABEL date="2020-11-06"
 
 # ADD Installation Scripts
@@ -27,6 +27,7 @@ RUN apt-get update && \
         wget \
         parted \
         gzip \
+        pigz \
         xz-utils \
         udev \
     # Install dependencies
