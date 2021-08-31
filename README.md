@@ -60,5 +60,5 @@ The source code is licensed under the [MIT license](LICENSE.md).
 
 The content of this project itself is licensed under the [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0).
 
-[release-install-shield]: https://img.shields.io/badge/Release-31--Oct--2021-blue
+[release-install-shield]: https://img.shields.io/badge/Release-01--Nov--2021-blue
 [license-shield]: https://img.shields.io/github/license/mgomesborges/mac-dev-setup.svg
