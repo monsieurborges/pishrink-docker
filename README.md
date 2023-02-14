@@ -30,7 +30,7 @@ This project is a dockerized version of the [PiShrink bash script](https://githu
 ## PiShrink options
 
 ```shell
-pishrink [-adhrspvzZ] IMAGE.img NEW-IMAGE.img
+pishrink [-adhrsvzZ] IMAGE.img NEW-IMAGE.img
 
 -s      Do not expand filesystem when image is booted the first time
 -v      Enables more verbose output
@@ -38,7 +38,6 @@ pishrink [-adhrspvzZ] IMAGE.img NEW-IMAGE.img
 -z      Compress image after shrinking with gzip
 -Z      Compress image after shrinking with xz
 -a      Compress image in parallel using multiple cores
--p      Remove logs, apt archives, dhcp leases and ssh hostkeys
 -d      Write debug messages in a debug log file
 ```
 
@@ -60,5 +59,5 @@ The source code is licensed under the [MIT license](LICENSE.md).
 
 The content of this project itself is licensed under the [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0).
 
-[release-install-shield]: https://img.shields.io/badge/Release-01--Nov--2021-blue
-[license-shield]: https://img.shields.io/github/license/mgomesborges/mac-dev-setup.svg
+[release-install-shield]: https://img.shields.io/badge/Release-14--Feb--2023-blue
+[license-shield]: https://img.shields.io/github/license/mgomesborges/pishrink-docker.svg
