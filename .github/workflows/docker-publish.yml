@@ -53,7 +53,8 @@ jobs:
             ${{ env.REGISTRY_DOCKER }}/${{ env.IMAGE_NAME_DOCKER }}
           tags: |
             type=semver,pattern={{raw}}
-            type=ref,event=branch,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
             type=ref,event=tag
             type=ref,event=pr
             type=sha,enable=false
