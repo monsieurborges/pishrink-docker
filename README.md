@@ -26,7 +26,7 @@ This project is a dockerized version of the [PiShrink bash script](https://githu
     docker run --privileged=true --rm \
         --volume $(pwd):/workdir \
         mgomesborges/pishrink \
-        pishrink -pZv IMAGE.img NEW-IMAGE.img
+        pishrink -Zv IMAGE.img NEW-IMAGE.img
     ```
 
 ## PiShrink options
