@@ -53,7 +53,7 @@ Check out [PiShrink GitHub](https://github.com/Drewsif/PiShrink) for more detail
 
 ## Author
 
-* [Marcos Gomes-Borges](https://github.com/monsieurborges)
+* [Marcos Borges](https://github.com/monsieurborges)
 
 ## License
 
