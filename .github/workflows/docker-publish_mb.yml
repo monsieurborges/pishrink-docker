@@ -1,0 +1,60 @@
+name: Docker
+
+on:
+  push:
+    branches: 'master'
+    tags: 'v*.*.*'
+  pull_request:
+    branches: 'master'
+    tags: 'v*.*.*'
+
+env:
+  REGISTRY_GITHUB: ghcr.io
+  REGISTRY_DOCKER: docker.io
+  IMAGE_NAME_GITHUB: ${{ github.repository }}
+  IMAGE_NAME_DOCKER: ${{ secrets.DOCKERHUB_USERNAME_MB }}/${{ secrets.DOCKERHUB_APPNAME }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY_DOCKER }}
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY_DOCKER }}
+          username: ${{ secrets.DOCKERHUB_USERNAME_MB }}
+          password: ${{ secrets.DOCKERHUB_TOKEN_MB }}
+
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            # GitHub Image
+            ${{ env.REGISTRY_DOCKER }}/${{ env.IMAGE_NAME_DOCKER }}
+          tags: |
+            type=semver,pattern={{raw}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=sha,enable=false
+
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
