@@ -6,9 +6,7 @@ It's great for saving disk space or sharing your Pi image on the Internet.
 
 This project is a dockerized version of the [PiShrink bash script](https://github.com/Drewsif/PiShrink) by Drew Bonasera.
 
-![Release][release-install-shield] [![Docker][docker-shield]](docker-yml) [![License][license-shield]](LICENSE.md)
-
-
+![Release][release-install-shield] ![Docker][docker-shield] [![License][license-shield]](LICENSE.md)
 
 ## Usage
 
@@ -61,7 +59,6 @@ The source code is licensed under the [MIT license](LICENSE.md).
 
 The content of this project itself is licensed under the [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0).
 
-[release-install-shield]: https://img.shields.io/badge/Release-30--Jun--2023-blue
+[release-install-shield]: https://img.shields.io/badge/Release-12--Sept--2023-blue
 [license-shield]: https://img.shields.io/github/license/monsieurborges/pishrink-docker
 [docker-shield]: https://github.com/monsieurborges/pishrink-docker/actions/workflows/docker-publish.yml/badge.svg
-[docker-yml]: https://github.com/monsieurborges/pishrink-docker/actions/workflows/docker-publish.yml
