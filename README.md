@@ -10,7 +10,7 @@ This project is a dockerized version of the [PiShrink bash script](https://githu
 
 ## Usage
 
-1. Make a copy of a Raspberry Pi SD card that you want to shrink ([see instructions here](https://github.com/BorgesNotes/raspberry-pi/blob/master/setup/clone-sd-card.md)).
+1. Make a copy of a Raspberry Pi SD card that you want to shrink ([see instructions here](https://github.com/borgesnotes/raspberry-pi/blob/master/setup/clone-sd-card.md)).
 
 2. Using the Terminal, access the directory containing the Raspberry Pi image:
 
@@ -51,7 +51,7 @@ Check out [PiShrink GitHub](https://github.com/Drewsif/PiShrink) for more detail
 
 ## Author
 
-* [Marcos Borges](https://github.com/BorgesNotes)
+* [Marcos Gomes Borges](https://github.com/borgesnotes)
 
 ## License
 
@@ -59,6 +59,6 @@ The source code is licensed under the [MIT license](LICENSE.md).
 
 The content of this project itself is licensed under the [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0).
 
-[release-install-shield]: https://img.shields.io/badge/Release-28--Dec--2023-blue
-[license-shield]: https://img.shields.io/github/license/BorgesNotes/pishrink-docker
-[docker-shield]: https://github.com/BorgesNotes/pishrink-docker/actions/workflows/docker-publish.yml/badge.svg
+[release-install-shield]: https://img.shields.io/badge/Release-06--May--2024-blue
+[license-shield]: https://img.shields.io/github/license/borgesnotes/pishrink-docker
+[docker-shield]: https://github.com/borgesnotes/pishrink-docker/actions/workflows/docker-publish.yml/badge.svg

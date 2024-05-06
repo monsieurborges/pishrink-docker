@@ -1,8 +1,8 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
-LABEL maintainer="Monsieur Borges"
+LABEL maintainer="Marcos Gomes Borges"
 LABEL version="1.0.2"
-LABEL date="2021-08-31"
+LABEL date="2024-05-06"
 
 # ADD Installation Scripts
 ###########################################################
@@ -44,4 +44,4 @@ RUN apt-get update && \
 
 # Build and Run
 ###########################################################
-# docker build --rm --tag "monsieurborges/pishrink:latest" .
+# docker build --rm --tag "borgesnotes/pishrink:latest" .
