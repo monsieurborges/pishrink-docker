@@ -1,8 +1,8 @@
-FROM arm64v8/ubuntu:20.04
+FROM arm64v8/ubuntu:24.04
 
 LABEL maintainer="Marcos Gomes Borges"
-LABEL version="1.0.2"
-LABEL date="2024-05-06"
+LABEL version="1.0.4"
+LABEL date="2024-05-20"
 
 # ADD Installation Scripts
 ###########################################################
