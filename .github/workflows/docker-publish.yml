@@ -1,0 +1,72 @@
+name: Docker
+
+on:
+  release:
+    types: [published]
+
+env:
+  REGISTRY_GITHUB: ghcr.io
+  REGISTRY_DOCKER: docker.io
+  IMAGE_NAME_GITHUB: ${{ github.repository }}
+  IMAGE_NAME_DOCKER: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_APPNAME }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_GITHUB }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY_DOCKER }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_DOCKER }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            # Docker Hub Image
+            ${{ env.REGISTRY_GITHUB }}/${{ env.IMAGE_NAME_GITHUB }}
+            # GitHub Image
+            ${{ env.REGISTRY_DOCKER }}/${{ env.IMAGE_NAME_DOCKER }}
+          tags: |
+            type=semver,pattern={{raw}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=sha,enable=false
+
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
