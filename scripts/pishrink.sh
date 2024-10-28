@@ -1,6 +1,10 @@
 #!/bin/bash
 
-version="v0.1.4"
+# Project: PiShrink
+# Description: PiShrink is a bash script that automatically shrink a pi image that will then resize to the max size of the SD card on boot.
+# Link: https://github.com/Drewsif/PiShrink
+
+version="v24.10.23"
 
 CURRENT_DIR="$(pwd)"
 SCRIPTNAME="${0##*/}"
@@ -13,7 +17,7 @@ declare -A ZIP_PARALLEL_OPTIONS=( [gzip]="-f9" [xz]="-T0" ) # options for zip to
 declare -A ZIPEXTENSIONS=( [gzip]="gz" [xz]="xz" ) # extensions of zipped files
 
 function info() {
-	echo "$SCRIPTNAME: $1 ..."
+	echo "$SCRIPTNAME: $1"
 }
 
 function error() {
@@ -88,15 +92,15 @@ function set_autoexpand() {
         info "An existing /etc/rc.local was not found, autoexpand may fail..."
     fi
 
-    if [[ -f "$mountdir/etc/rc.local" ]] && [[ "$(md5sum "$mountdir/etc/rc.local" | cut -d ' ' -f 1)" != "5c286b336c0606ed8e6f87708f7802eb" ]]; then
+    if ! grep -q "## PiShrink https://github.com/Drewsif/PiShrink ##" "$mountdir/etc/rc.local"; then
       echo "Creating new /etc/rc.local"
     if [ -f "$mountdir/etc/rc.local" ]; then
         mv "$mountdir/etc/rc.local" "$mountdir/etc/rc.local.bak"
     fi
 
-    #####Do not touch the following lines#####
-cat <<\EOF1 > "$mountdir/etc/rc.local"
+cat <<'EOFRC' > "$mountdir/etc/rc.local"
 #!/bin/bash
+## PiShrink https://github.com/Drewsif/PiShrink ##
 do_expand_rootfs() {
   ROOT_PART=$(mount | sed -n 's|^/dev/\(.*\) on / .*|\1|p')
 
@@ -155,8 +159,8 @@ if [[ -f /etc/rc.local.bak ]]; then
   /etc/rc.local
 fi
 exit 0
-EOF1
-    #####End no touch zone#####
+EOFRC
+
     chmod +x "$mountdir/etc/rc.local"
     fi
     umount "$mountdir"
@@ -165,10 +169,11 @@ EOF1
 help() {
 	local help
 	read -r -d '' help << EOM
-Usage: $0 [-adhrsvzZ] imagefile.img [newimagefile.img]
+Usage: $0 [-adhnrsvzZ] imagefile.img [newimagefile.img]
 
   -s         Don't expand filesystem when image is booted the first time
   -v         Be verbose
+  -n         Disable automatic update checking
   -r         Use advanced filesystem repair option if the normal one fails
   -z         Compress image after shrinking with gzip
   -Z         Compress image after shrinking with xz
@@ -181,15 +186,17 @@ EOM
 
 should_skip_autoexpand=false
 debug=false
+update_check=true
 repair=false
 parallel=false
 verbose=false
 ziptool=""
 
-while getopts ":adhrsvzZ" opt; do
+while getopts ":adnhrsvzZ" opt; do
   case "${opt}" in
     a) parallel=true;;
     d) debug=true;;
+    n) update_check=false;;
     h) help;;
     r) repair=true;;
     s) should_skip_autoexpand=true ;;
@@ -208,7 +215,16 @@ if [ "$debug" = true ]; then
 	exec 2> >(stdbuf -i0 -o0 -e0 tee -a "$LOGFILE" >&2)
 fi
 
-echo "${0##*/} $version"
+echo -e "PiShrink $version - https://github.com/Drewsif/PiShrink\n"
+
+# Try and check for updates
+if $update_check; then
+  latest_release=$(curl -m 5 https://api.github.com/repos/Drewsif/PiShrink/releases/latest 2>/dev/null | grep -i "tag_name" 2>/dev/null | awk -F '"' '{print $4}' 2>/dev/null)
+  if [[ $? ]] && [ "$latest_release" \> "$version" ]; then
+    echo "WARNING: You do not appear to be running the latest version of PiShrink. Head on over to https://github.com/Drewsif/PiShrink to grab $latest_release"
+    echo ""
+  fi
+fi
 
 #Args
 src="$1"
@@ -234,7 +250,6 @@ fi
 export LANGUAGE=POSIX
 export LC_ALL=POSIX
 export LANG=POSIX
-
 
 # check selected compression tool is supported and installed
 if [[ -n $ziptool ]]; then
@@ -330,69 +345,80 @@ fi
 minsize=$(cut -d ':' -f 2 <<< "$minsize" | tr -d ' ')
 logVariables $LINENO currentsize minsize
 if [[ $currentsize -eq $minsize ]]; then
-  error $LINENO "Image already shrunk to smallest size"
-  exit 11
-fi
+  info "Filesystem already shrunk to smallest size. Skipping filesystem shrinking"
+else
+  #Add some free space to the end of the filesystem
+  extra_space=$(($currentsize - $minsize))
+  logVariables $LINENO extra_space
+  for space in 5000 1000 100; do
+    if [[ $extra_space -gt $space ]]; then
+      minsize=$(($minsize + $space))
+      break
+    fi
+  done
+  logVariables $LINENO minsize
 
-#Add some free space to the end of the filesystem
-extra_space=$(($currentsize - $minsize))
-logVariables $LINENO extra_space
-for space in 5000 1000 100; do
-  if [[ $extra_space -gt $space ]]; then
-    minsize=$(($minsize + $space))
-    break
+  #Shrink filesystem
+  info "Shrinking filesystem"
+  if [ -z "$mountdir" ]; then
+    mountdir=$(mktemp -d)
   fi
-done
-logVariables $LINENO minsize
 
-#Shrink filesystem
-info "Shrinking filesystem"
-resize2fs -p "$loopback" $minsize
-rc=$?
-if (( $rc )); then
-  error $LINENO "resize2fs failed with rc $rc"
-  mount "$loopback" "$mountdir"
-  mv "$mountdir/etc/rc.local.bak" "$mountdir/etc/rc.local"
-  umount "$mountdir"
-  losetup -d "$loopback"
-  exit 12
-fi
-sleep 1
+  resize2fs -p "$loopback" $minsize
+  rc=$?
+  if (( $rc )); then
+    error $LINENO "resize2fs failed with rc $rc"
+    mount "$loopback" "$mountdir"
+    mv "$mountdir/etc/rc.local.bak" "$mountdir/etc/rc.local"
+    umount "$mountdir"
+    losetup -d "$loopback"
+    exit 12
+  else
+    info "Zeroing any free space left"
+    mount "$loopback" "$mountdir"
+    cat /dev/zero > "$mountdir/PiShrink_zero_file" 2>/dev/null
+    info "Zeroed $(ls -lh "$mountdir/PiShrink_zero_file" | cut -d ' ' -f 5)"
+    rm -f "$mountdir/PiShrink_zero_file"
+    umount "$mountdir"
+  fi
+  sleep 1
 
-#Shrink partition
-partnewsize=$(($minsize * $blocksize))
-newpartend=$(($partstart + $partnewsize))
-logVariables $LINENO partnewsize newpartend
-parted -s -a minimal "$img" rm "$partnum"
-rc=$?
-if (( $rc )); then
-	error $LINENO "parted failed with rc $rc"
-	exit 13
-fi
+  #Shrink partition
+  info "Shrinking partition"
+  partnewsize=$(($minsize * $blocksize))
+  newpartend=$(($partstart + $partnewsize))
+  logVariables $LINENO partnewsize newpartend
+  parted -s -a minimal "$img" rm "$partnum"
+  rc=$?
+  if (( $rc )); then
+    error $LINENO "parted failed with rc $rc"
+    exit 13
+  fi
 
-parted -s "$img" unit B mkpart "$parttype" "$partstart" "$newpartend"
-rc=$?
-if (( $rc )); then
-	error $LINENO "parted failed with rc $rc"
-	exit 14
-fi
+  parted -s "$img" unit B mkpart "$parttype" "$partstart" "$newpartend"
+  rc=$?
+  if (( $rc )); then
+    error $LINENO "parted failed with rc $rc"
+    exit 14
+  fi
 
-#Truncate the file
-info "Shrinking image"
-endresult=$(parted -ms "$img" unit B print free)
-rc=$?
-if (( $rc )); then
-	error $LINENO "parted failed with rc $rc"
-	exit 15
-fi
+  #Truncate the file
+  info "Truncating image"
+  endresult=$(parted -ms "$img" unit B print free)
+  rc=$?
+  if (( $rc )); then
+    error $LINENO "parted failed with rc $rc"
+    exit 15
+  fi
 
-endresult=$(tail -1 <<< "$endresult" | cut -d ':' -f 2 | tr -d 'B')
-logVariables $LINENO endresult
-truncate -s "$endresult" "$img"
-rc=$?
-if (( $rc )); then
-	error $LINENO "trunate failed with rc $rc"
-	exit 16
+  endresult=$(tail -1 <<< "$endresult" | cut -d ':' -f 2 | tr -d 'B')
+  logVariables $LINENO endresult
+  truncate -s "$endresult" "$img"
+  rc=$?
+  if (( $rc )); then
+    error $LINENO "truncate failed with rc $rc"
+    exit 16
+  fi
 fi
 
 # handle compression
