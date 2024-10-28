@@ -1,4 +1,4 @@
-FROM arm64v8/ubuntu:24.04
+FROM ubuntu:24.10
 
 LABEL maintainer="Monsieur Borges"
 LABEL version="1.0.0"
